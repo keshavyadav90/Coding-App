@@ -1,5 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { useNavigation } from 'expo-router';
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { responsiveFontSize, responsiveHeight, responsiveScreenWidth } from 'react-native-responsive-dimensions';
@@ -13,13 +14,16 @@ const FEATURES = [
 ];
 
 const Start = () => {
-  const handleGetStarted = () => {
+  const navigation = useNavigation()
+
   
+  const handleGetStarted = () => {
+
     console.log('Get Started pressed');
   };
 
   const handleLogin = () => {
-   
+
     console.log('Login pressed');
   };
 
@@ -38,13 +42,13 @@ const Start = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-  
+
       <View style={styles.header}>
         <MaterialIcons name="terminal" size={30} color="#2bee79" />
         <Text style={styles.headerText}>CodeCraft</Text>
       </View>
 
-   
+
       <View style={styles.heroImageContainer}>
         <Image
           source={{
@@ -55,19 +59,19 @@ const Start = () => {
         />
       </View>
 
- 
+
       <View style={styles.featuresSection}>
         {FEATURES.map(renderFeatureItem)}
       </View>
 
-    
+
       <View style={styles.bottomSection}>
-     
-        <TouchableOpacity style={styles.button} onPress={handleGetStarted}>
+
+        <TouchableOpacity style={styles.button} onPress={()=> navigation.navigate("(tabs)")}>
           <Text style={styles.buttonText}>Get Started</Text>
         </TouchableOpacity>
 
-       
+
         <View style={styles.bottomTextContainer}>
           <Text style={styles.bottomText}>Already have an account?</Text>
           <TouchableOpacity onPress={handleLogin}>
@@ -143,6 +147,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#2bee79',
+    shadowColor: '#2bee79',
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 10,
   },
   buttonText: {
     fontSize: responsiveFontSize(2.5),
@@ -160,7 +172,7 @@ const styles = StyleSheet.create({
     fontSize: responsiveFontSize(2),
   },
   loginText: {
-    color: '#2bee79',
+    color: 'white',
     fontSize: responsiveFontSize(2),
     fontWeight: '700',
     marginLeft: responsiveScreenWidth(1.5),

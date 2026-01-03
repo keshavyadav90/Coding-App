@@ -5,17 +5,84 @@ import { responsiveFontSize, responsiveHeight, responsiveScreenWidth } from 'rea
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5'
 import Ionicon from '@expo/vector-icons/Ionicons'
+import { Link, useRouter } from 'expo-router'
+import { useSignUp } from '@clerk/clerk-expo';
 
-const Account = () => {
-  const [showPassword1, setShowPassword1] = useState(false);
+
+const Signup = () => {
+  const { isLoaded, signUp, setActive } = useSignUp
+  const router = useRouter()
+  const [emailAddress , setEmailAddress] = useState()
+  const [Password, setPassword] = useState(false);
   const [showPassword2, setShowPassword2] = useState(false);
+  const [pendingVerification, setPendingVerification] = React.useState(false)
+   const [code, setCode] = React.useState('')
 
+
+
+   const onSignUpPress = async () => {
+    if (!isLoaded) return
+
+    console.log(emailAddress, Password)
+
+    try {
+      await signUp.create({
+        emailAddress,
+        Password,
+      })
+
+      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' })
+
+      setPendingVerification(true)
+    } catch (err) {
+
+      console.error(JSON.stringify(err, null, 2))
+    }
+  }
+
+  const onVerifyPress = async () => {
+    if (!isLoaded) return
+
+    try {
+      const signUpAttempt = await signUp.attemptEmailAddressVerification({
+        code,
+      })
+
+      if (signUpAttempt.status === 'complete') {
+        await setActive({ session: signUpAttempt.createdSessionId })
+        router.replace('/')
+      } else {
+
+        console.error(JSON.stringify(signUpAttempt, null, 2))
+      }
+    } catch (err) {
+
+      console.error(JSON.stringify(err, null, 2))
+    }
+  }
+
+
+if (pendingVerification) {
+    return (
+      <>
+        <Text>Verify your email</Text>
+        <TextInput
+          value={code}
+          placeholder="Enter your verification code"
+          onChangeText={(code) => setCode(code)}
+        />
+        <TouchableOpacity onPress={onVerifyPress}>
+          <Text>Verify</Text>
+        </TouchableOpacity>
+      </>
+    )
+  }
 
   return (
     <SafeAreaView style={styles.container}>
 
-      <View style={{ marginBottom: 20  }}>
-        <View style={{flexDirection:"row",}}>
+      <View style={{ marginBottom: 20 }}>
+        <View style={{ flexDirection: "row", }}>
           <TouchableOpacity style={styles.backButton}>
             <MaterialIcons name="arrow-back-ios" size={26} color="#fff" />
           </TouchableOpacity>
@@ -23,7 +90,7 @@ const Account = () => {
             <Text style={styles.title}>Create Account</Text>
           </View>
         </View>
-        <View style={{ alignItems:"center" }}>
+        <View style={{ alignItems: "center" }}>
           <Text style={styles.subtitle}>Start your coding journey today.</Text>
         </View>
       </View>
@@ -48,7 +115,7 @@ const Account = () => {
       <View style={styles.inputContainer}>
         <Text style={styles.inputLabel}>Email</Text>
         <View style={styles.inputWrapper}>
-          
+
           <TextInput
             placeholder="name@example.com"
             placeholderTextColor="#588169"
@@ -64,7 +131,7 @@ const Account = () => {
       <View style={styles.inputContainer}>
         <Text style={styles.inputLabel}>Password</Text>
         <View style={styles.inputWrapper}>
-          
+
           <TextInput
             placeholder="Enter your password"
             placeholderTextColor="#588169"
@@ -80,10 +147,10 @@ const Account = () => {
           </TouchableOpacity>
         </View>
 
-        <View style={{marginTop: responsiveHeight(1)}}>
+        <View style={{ marginTop: responsiveHeight(1) }}>
           <Text style={styles.inputLabel}>Confirm Password</Text>
           <View style={styles.inputWrapper}>
-           
+
             <TextInput
               placeholder="Re-Enter password"
               placeholderTextColor="#588169"
@@ -107,17 +174,17 @@ const Account = () => {
         </TouchableOpacity>
       </View>
 
-      
+
       <View style={styles.dividerContainer}>
-        
+
         <Text style={styles.dividerText}>Or continue with</Text>
-        
+
       </View>
 
 
       <View style={styles.socialContainer}>
         <TouchableOpacity style={styles.socialButton}>
-          <Ionicon name='logo-google' size={24} color={"#c94322ff"}/>
+          <Ionicon name='logo-google' size={24} color={"#c94322ff"} />
           <Text style={styles.socialButtonText}>Continue with Google</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.socialButton}>
@@ -137,7 +204,7 @@ const Account = () => {
   )
 }
 
-export default Account
+export default Signup;
 
 const styles = StyleSheet.create({
   container: {
@@ -147,13 +214,13 @@ const styles = StyleSheet.create({
   backButton: {
     marginLeft: responsiveScreenWidth(5),
     marginTop: responsiveHeight(1.2),
-    marginRight:80
-    
+    marginRight: 80
+
   },
   headerContainer: {
     margin: responsiveScreenWidth(2),
     justifyContent: "center",
-    alignContent:"center"
+    alignContent: "center"
 
   },
   title: {
@@ -240,8 +307,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#193324',
     width: responsiveScreenWidth(85),
     marginVertical: responsiveHeight(1),
-    flexDirection:"row",
-    gap:10
+    flexDirection: "row",
+    gap: 10
   },
   socialButtonText: {
     color: '#fff',

@@ -1,21 +1,61 @@
 
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { useNavigation } from 'expo-router';
 import React, { useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { responsiveFontSize, responsiveHeight, responsiveScreenWidth } from 'react-native-responsive-dimensions';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Link, useRouter } from 'expo-router'
+import { useSignIn } from '@clerk/clerk-expo'
+
+
 
 const Login = () => {
+  const { signIn, setActive, isLoaded } = useSignIn()
+  const navigation = useNavigation()
   const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter()
+
+
+  const [emailAddress, setEmailAddress] = React.useState('')
+  const [password, setPassword] = React.useState('')
+
+ const onSignInPress = async () => {
+    if (!isLoaded) return
+
+
+    try {
+      const signInAttempt = await signIn.create({
+        identifier: emailAddress,
+        password,
+      })
+
+
+      if (signInAttempt.status === 'complete') {
+        await setActive({ session: signInAttempt.createdSessionId })
+        router.replace('/')
+      } else {
+
+        console.error(JSON.stringify(signInAttempt, null, 2))
+      }
+    } catch (err) {
+
+      console.error(JSON.stringify(err, null, 2))
+    }
+  }
+
 
   return (
     <SafeAreaView style={styles.container}>
-     
+
+
+
       <TouchableOpacity style={styles.backButton}>
         <MaterialIcons name="arrow-back" size={26} color="#fff" />
       </TouchableOpacity>
 
-      
+
+
       <View style={styles.headerContainer}>
         <Text style={styles.title}>Welcome Back 👋</Text>
         <Text style={styles.subtitle}>Ready to solve your next challenge?</Text>
@@ -36,7 +76,6 @@ const Login = () => {
         </View>
       </View>
 
-
       <View style={styles.inputContainer}>
         <Text style={styles.inputLabel}>Password</Text>
         <View style={styles.inputWrapper}>
@@ -47,6 +86,8 @@ const Login = () => {
             style={styles.textInput}
             secureTextEntry={!showPassword}
           />
+
+
           <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
             <MaterialIcons
               name={showPassword ? "visibility" : "visibility-off"}
@@ -60,23 +101,24 @@ const Login = () => {
         </TouchableOpacity>
       </View>
 
-    
+
       <View style={styles.loginButtonContainer}>
         <TouchableOpacity style={styles.loginButton}>
           <Text style={styles.loginButtonText}>Log In</Text>
         </TouchableOpacity>
       </View>
 
-      
+
       <View style={styles.dividerContainer}>
         <Text style={styles.dividerText}>Or continue with</Text>
       </View>
 
-      
+
       <View style={styles.socialContainer}>
         <TouchableOpacity style={styles.socialButton}>
           <Text style={styles.socialButtonText}>Continue with Google</Text>
         </TouchableOpacity>
+
         <TouchableOpacity style={styles.socialButton}>
           <Text style={styles.socialButtonText}>Continue with GitHub</Text>
         </TouchableOpacity>
@@ -85,10 +127,11 @@ const Login = () => {
 
       <View style={styles.signUpContainer}>
         <Text style={styles.signUpText}>Don't have an account? </Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("(tabs)")}>
           <Text style={styles.signUpLink}>Sign Up</Text>
         </TouchableOpacity>
       </View>
+      
     </SafeAreaView>
   );
 };

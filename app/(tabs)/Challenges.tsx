@@ -232,8 +232,8 @@ export default function Challenges() {
           </View>
         ))}
       </ScrollView>
-
-      {/* Bottom Navigation */}
+{/* 
+    
       <View style={styles.bottomNav}>
         <TouchableOpacity style={styles.navItem}>
           <Ionicons name="home-outline" size={rf(3)} color="#9ca3af" />
@@ -251,7 +251,7 @@ export default function Challenges() {
           <Ionicons name="person-outline" size={rf(3)} color="#9ca3af" />
           <Text style={styles.navText}>Profile</Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
     </SafeAreaView>
   );
 }
