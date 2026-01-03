@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "242636796740",
+    "project_id": "coding-app-7a20f",
+    "storage_bucket": "coding-app-7a20f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:242636796740:android:78b7cf0e3ac0498f949d11",
+        "android_client_info": {
+          "package_name": "com.anonymous.Expo_App"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAuHzg5_2sXrZS81ujMjLUn0CdaOKeUfKw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
