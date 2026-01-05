@@ -13,8 +13,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFonts, SpaceGrotesk_300Light, SpaceGrotesk_400Regular, SpaceGrotesk_500Medium, SpaceGrotesk_600SemiBold, SpaceGrotesk_700Bold } from '@expo-google-fonts/space-grotesk';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from 'expo-router';
 
 export default function App() {
+  const Navigation = useNavigation()
   let [fontsLoaded] = useFonts({
     SpaceGrotesk_300Light,
     SpaceGrotesk_400Regular,
@@ -26,6 +28,7 @@ export default function App() {
   if (!fontsLoaded) {
     return null;
   }
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -121,7 +124,7 @@ export default function App() {
                 </View>
 
                 {/* Action Button */}
-                <TouchableOpacity style={styles.resumeButton}>
+                <TouchableOpacity style={styles.resumeButton} onPress={() => Navigation.navigate("codeEditor")}>
                   <Ionicons name="play" size={20} color="#102217" />
                   <Text style={styles.resumeButtonText}>Resume Learning</Text>
                 </TouchableOpacity>

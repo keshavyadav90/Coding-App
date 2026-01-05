@@ -12,18 +12,18 @@ import { useSignUp } from '@clerk/clerk-expo';
 const Signup = () => {
   const { isLoaded, signUp, setActive } = useSignUp
   const router = useRouter()
-  const [emailAddress , setEmailAddress] = useState()
+  const [emailAddress, setEmailAddress] = useState()
   const [Password, setPassword] = useState(false);
-  const [showPassword2, setShowPassword2] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [pendingVerification, setPendingVerification] = React.useState(false)
-   const [code, setCode] = React.useState('')
+  const [code, setCode] = React.useState('')
 
 
 
-   const onSignUpPress = async () => {
+  const handleEmailSignUp = async () => {
     if (!isLoaded) return
 
-    console.log(emailAddress, Password)
+    // console.log(emailAddress, Password)
 
     try {
       await signUp.create({
@@ -62,7 +62,7 @@ const Signup = () => {
   }
 
 
-if (pendingVerification) {
+  if (pendingVerification) {
     return (
       <>
         <Text>Verify your email</Text>
@@ -78,12 +78,18 @@ if (pendingVerification) {
     )
   }
 
+   const handleGoBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    }
+  }
+
   return (
     <SafeAreaView style={styles.container}>
 
       <View style={{ marginBottom: 20 }}>
         <View style={{ flexDirection: "row", }}>
-          <TouchableOpacity style={styles.backButton}>
+          <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
             <MaterialIcons name="arrow-back-ios" size={26} color="#fff" />
           </TouchableOpacity>
           <View style={styles.headerContainer}>
@@ -94,9 +100,6 @@ if (pendingVerification) {
           <Text style={styles.subtitle}>Start your coding journey today.</Text>
         </View>
       </View>
-
-
-
 
       <View style={styles.inputContainer}>
         <Text style={styles.inputLabel}>Username</Text>
@@ -136,11 +139,12 @@ if (pendingVerification) {
             placeholder="Enter your password"
             placeholderTextColor="#588169"
             style={styles.textInput}
-            secureTextEntry={!showPassword1}
+            secureTextEntry={!Password
+            }
           />
-          <TouchableOpacity onPress={() => setShowPassword1(!showPassword1)}>
+          <TouchableOpacity onPress={() => setPassword(!Password)}>
             <MaterialIcons
-              name={showPassword1 ? "visibility" : "visibility-off"}
+              name={Password ? "visibility" : "visibility-off"}
               size={24}
               color="#92c9a8"
             />
@@ -155,11 +159,11 @@ if (pendingVerification) {
               placeholder="Re-Enter password"
               placeholderTextColor="#588169"
               style={styles.textInput}
-              secureTextEntry={!showPassword2}
+              secureTextEntry={!showPassword}
             />
-            <TouchableOpacity onPress={() => setShowPassword2(!showPassword2)}>
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
               <MaterialIcons
-                name={showPassword2 ? "visibility" : "visibility-off"}
+                name={showPassword ? "visibility" : "visibility-off"}
                 size={24}
                 color="#92c9a8"
               />
@@ -196,7 +200,7 @@ if (pendingVerification) {
 
       <View style={styles.signUpContainer}>
         <Text style={styles.signUpText}>Don't have an account? </Text>
-        <TouchableOpacity>
+        <TouchableOpacity >
           <Text style={styles.signUpLink}>LogIn</Text>
         </TouchableOpacity>
       </View>

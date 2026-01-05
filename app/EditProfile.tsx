@@ -14,7 +14,7 @@ import {
 import { responsiveHeight as hp, responsiveFontSize as rf, responsiveWidth as wp } from 'react-native-responsive-dimensions';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-// Experience levels
+
 const experienceLevels = ['Novice', 'Intermediate', 'Pro'];
 
 export default function EditProfile() {

@@ -1,4 +1,4 @@
-import { Tabs } from 'expo-router';
+import { Redirect, Tabs } from 'expo-router';
 import React from 'react';
 import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -7,10 +7,25 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
+import { useAuth } from '@clerk/clerk-expo';
 export default function TabLayout() {
 
   const colorScheme = useColorScheme();
+  const {isSignedIn , isLoaded} = useAuth();
+
+  if(!isLoaded) {
+    return (
+      <View>
+        <ActivityIndicator  size= "large"/>
+      </View>
+    )
+  }
+  if(!isSignedIn) {
+    return <Redirect href= "/(auth)/Login"/>
+  }
+
+
 
   return (
     <Tabs

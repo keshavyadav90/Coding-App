@@ -6,10 +6,10 @@ import {
   TouchableOpacity,
   StyleSheet,
   StatusBar,
-
-
-  
 } from 'react-native';
+
+
+
 import {
   responsiveWidth as rw,
   responsiveHeight as rh,

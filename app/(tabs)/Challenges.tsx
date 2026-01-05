@@ -191,7 +191,7 @@ export default function Challenges() {
         </View>
       </View>
 
-      {/* Content */}
+      
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}

@@ -1,30 +1,89 @@
 
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useNavigation } from 'expo-router';
-import React, { useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View, Platform, Alert, ActivityIndicator } from 'react-native';
 import { responsiveFontSize, responsiveHeight, responsiveScreenWidth } from 'react-native-responsive-dimensions';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Link, useRouter } from 'expo-router'
 import { useSignIn } from '@clerk/clerk-expo'
+import { useSSO } from '@clerk/clerk-expo';
+import { useAuth } from '@clerk/clerk-expo';
+import * as AuthSession from 'expo-auth-session';
+import * as WebBrowser from 'expo-web-browser';
 
+
+WebBrowser.maybeCompleteAuthSession()
+const useWarmupBrowser = () => {
+  useEffect(() => {
+    if (Platform.OS !== "android") return
+    void WebBrowser.warmUpAsync()
+
+    return () => {
+      void WebBrowser.coolDownAsync()
+    }
+  }, [])
+}
+
+
+
+type SSOStrategy = 'oauth_google' | 'oauth_github';
 
 
 const Login = () => {
+
+   useWarmupBrowser();
+
+  const { startSSOFlow } = useSSO()
   const { signIn, setActive, isLoaded } = useSignIn()
   const navigation = useNavigation()
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter()
-
-
   const [emailAddress, setEmailAddress] = React.useState('')
   const [password, setPassword] = React.useState('')
+  const [isLoading, setIsLoading] = useState(false)
 
- const onSignInPress = async () => {
-    if (!isLoaded) return
 
+
+
+  const handleSSOSignIn = useCallback(async (strategy: SSOStrategy) => {
 
     try {
+      setIsLoading(true)
+      const { createdSessionId, setActive: setActiveSession } = await startSSOFlow({
+        strategy,
+        redirectUrl: AuthSession.makeRedirectUri(),
+      })
+
+      if (createdSessionId && setActiveSession) {
+        await setActiveSession({ session: createdSessionId })
+        router.replace("/(tabs)/Home")
+
+      }
+    } catch (error) {
+
+      console.error(`${strategy} sign-in error:`, JSON.stringify(error, null, 2));
+
+    }
+    finally {
+      setIsLoading(false);
+    }
+
+
+  }, [startSSOFlow, router])
+
+
+
+  const handleEmailSignIn = async () => {
+
+    if (!isLoaded || !emailAddress || !password) {
+      Alert.alert("Please fill in all fields");
+      return;
+
+    }
+    try {
+      setIsLoading(true);
+
       const signInAttempt = await signIn.create({
         identifier: emailAddress,
         password,
@@ -33,16 +92,26 @@ const Login = () => {
 
       if (signInAttempt.status === 'complete') {
         await setActive({ session: signInAttempt.createdSessionId })
-        router.replace('/')
+        router.replace("/(tabs)/Home")
       } else {
 
-        console.error(JSON.stringify(signInAttempt, null, 2))
+        console.error('Sign-in incomplete:', JSON.stringify(signInAttempt, null, 2))
       }
     } catch (err) {
 
-      console.error(JSON.stringify(err, null, 2))
+      console.error('Email sign-in error:', JSON.stringify(err, null, 2));
+    }
+    finally {
+      setIsLoading(false);
     }
   }
+
+  const handleGoBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    }
+  }
+
 
 
   return (
@@ -50,7 +119,7 @@ const Login = () => {
 
 
 
-      <TouchableOpacity style={styles.backButton}>
+      <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
         <MaterialIcons name="arrow-back" size={26} color="#fff" />
       </TouchableOpacity>
 
@@ -72,6 +141,9 @@ const Login = () => {
             style={styles.textInput}
             keyboardType="email-address"
             autoCapitalize="none"
+            value={emailAddress}
+            onChangeText={setEmailAddress}
+            editable={!isLoading}
           />
         </View>
       </View>
@@ -85,6 +157,9 @@ const Login = () => {
             placeholderTextColor="#588169"
             style={styles.textInput}
             secureTextEntry={!showPassword}
+            value={password}
+            onChangeText={setPassword}
+            editable={!isLoading}
           />
 
 
@@ -103,8 +178,15 @@ const Login = () => {
 
 
       <View style={styles.loginButtonContainer}>
-        <TouchableOpacity style={styles.loginButton}>
-          <Text style={styles.loginButtonText}>Log In</Text>
+        <TouchableOpacity style={[styles.loginButton, isLoading && styles.loginButtonDisabled]}
+         onPress={() => handleEmailSignIn}
+         disabled = {isLoading}
+         >
+          { isLoading ? (
+            <ActivityIndicator  color= "#000"/>
+          ) : (
+            <Text style={styles.loginButtonText}> Login In</Text>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -115,11 +197,11 @@ const Login = () => {
 
 
       <View style={styles.socialContainer}>
-        <TouchableOpacity style={styles.socialButton}>
+        <TouchableOpacity style={styles.socialButton} onPress={() => handleSSOSignIn("oauth_google")}>
           <Text style={styles.socialButtonText}>Continue with Google</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.socialButton}>
+        <TouchableOpacity style={styles.socialButton} onPress={() => handleSSOSignIn("oauth_github")}>
           <Text style={styles.socialButtonText}>Continue with GitHub</Text>
         </TouchableOpacity>
       </View>
@@ -127,11 +209,11 @@ const Login = () => {
 
       <View style={styles.signUpContainer}>
         <Text style={styles.signUpText}>Don't have an account? </Text>
-        <TouchableOpacity onPress={() => navigation.navigate("(tabs)")}>
+        <TouchableOpacity onPress={() => router.push("/(auth)/Signup")}>
           <Text style={styles.signUpLink}>Sign Up</Text>
         </TouchableOpacity>
       </View>
-      
+
     </SafeAreaView>
   );
 };
@@ -254,4 +336,7 @@ const styles = StyleSheet.create({
     fontSize: responsiveFontSize(2.2),
     fontWeight: '600',
   },
+  loginButtonDisabled :{
+    opacity : 0.6
+  }
 });
