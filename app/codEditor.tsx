@@ -1,181 +1,225 @@
-import React, { useState } from 'react';
+
+import { Ionicons } from '@expo/vector-icons';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  View,
-  Text,
+  Dimensions,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
-  TouchableOpacity,
   StyleSheet,
-  StatusBar,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 
+import { SafeAreaView } from 'react-native-safe-area-context';
+import SyntaxHighlighter from 'react-native-syntax-highlighter';
+import { atomOneDark } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 
-import {
-  responsiveWidth as rw,
-  responsiveHeight as rh,
-  responsiveFontSize as rf,
-} from 'react-native-responsive-dimensions';
+interface data {
+  id: number,
+  question: string,
+  hint1: string,
+  hint2: string,
+  example1_input: string,
+  example1_output: string,
+  example2_input: string,
+  example2_output: string,
+  level: string,
+  discription: string,
 
-const App = () => {
-  const [checklist, setChecklist] = useState([
-    { id: 1, text: 'Define variable tempX', checked: true },
-    { id: 2, text: 'Implement bubble sort loop', checked: false },
-    { id: 3, text: 'Return sorted integers', checked: false },
-  ]);
 
-  const toggleCheck = (id) => {
-    setChecklist(
-      checklist.map((item) =>
-        item.id === id ? { ...item, checked: !item.checked } : item
-      )
-    );
+}
+
+
+const CodeEditor = () => {
+  const navigation = useRouter();
+  const scrollViewRef = useRef<ScrollView>(null);
+  const windowWidth = Dimensions.get('window').width;
+
+  const { parsedItem } = useLocalSearchParams<{ parsedItem: string }>();
+
+  const Item: data | null = parsedItem  
+
+  if (!Item) return null
+
+
+  const [code, setCode] = useState<string>("");
+  const [activeTab, setActiveTab] = useState<'case1' | 'case2'>('case1');
+  const [containerHeight, setContainerHeight] = useState(300);
+
+  const handleCodeChange = (newCode: string) => {
+    setCode(newCode);
+    setTimeout(() => {
+      scrollViewRef.current?.scrollToEnd({ animated: true });
+    }, 50);
   };
 
-  const checkedCount = checklist.filter((item) => item.checked).length;
 
-  const codeLines = [
-    'function sortArray(arr) {',
-    '  let n = arr.length;',
-    '  ',
-    '  // TODO: Implement sorting logic',
-    '  for (let i = 0; i < n - 1; i++) {',
-    '    |',
-    '  }',
-    '  ',
-    '  return arr;',
-    '}',
-  ];
+  useEffect(() => {
+    const lines = code.split('\n').length;
+    const newHeight = Math.max(300, lines * 24 + 40);
+    setContainerHeight(newHeight);
+  }, [code]);
+   
+  
 
   return (
+
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#102217" />
-      
-      {/* Header */}
+
       <View style={styles.header}>
-        <View style={styles.topBar}>
-          <TouchableOpacity style={styles.iconButton}>
-            <Text style={styles.iconText}>←</Text>
-          </TouchableOpacity>
-          <Text style={styles.title}>Algo-Sort X</Text>
-          <TouchableOpacity style={[styles.iconButton, styles.primaryIconButton]}>
-            <Text style={styles.primaryIconText}>☰</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity onPress={() => navigation.back()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
 
-        {/* HUD Stats */}
-        <View style={styles.hudContainer}>
-          <View style={styles.statPill}>
-            <Text style={styles.timerIcon}>⏱</Text>
-            <Text style={styles.timerText}>14:02</Text>
-          </View>
-          <View style={styles.statPill}>
-            <Text style={styles.rankLabel}>RANK</Text>
-            <Text style={styles.rankValue}>#12</Text>
-            <View style={styles.rankChange}>
-              <Text style={styles.rankArrow}>↑</Text>
-              <Text style={styles.rankChangeValue}>3</Text>
-            </View>
-          </View>
+        <View style={styles.badge}>
+          <Text style={styles.badgeText}>JS JavaScript</Text>
+        </View>
+        <View style={styles.headerRightIcons}>
+          <Ionicons name="copy-outline" size={20} color="#ccc" style={{ marginRight: 15 }} />
+          <Ionicons name="refresh-outline" size={20} color="#ccc" />
         </View>
       </View>
 
-      <ScrollView style={styles.mainContent} showsVerticalScrollIndicator={false}>
-        {/* Mission Objectives */}
-        <View style={styles.section}>
-          <View style={styles.objectivesCard}>
-            <View style={styles.objectivesHeader}>
-              <Text style={styles.objectivesTitle}>MISSION OBJECTIVES</Text>
-              <View style={styles.progressBadge}>
-                <Text style={styles.progressText}>{checkedCount}/3</Text>
-              </View>
-            </View>
-            
-            {checklist.map((item) => (
-              <TouchableOpacity
-                key={item.id}
-                style={styles.checklistItem}
-                onPress={() => toggleCheck(item.id)}
-              >
-                <View style={[styles.checkbox, item.checked && styles.checkboxChecked]}>
-                  {item.checked && <Text style={styles.checkmark}>✓</Text>}
-                </View>
-                <Text style={[styles.checklistText, item.checked && styles.checklistTextChecked]}>
-                  {item.text}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
 
-        {/* Code Editor */}
-        <View style={styles.section}>
-          <View style={styles.editorHeader}>
-            <Text style={styles.fileName}>solution.js</Text>
-            <Text style={styles.autoSaved}>Auto-saved</Text>
-          </View>
-          
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+        style={styles.keyboardContainer}
+      >
+
+
+        <ScrollView
+          ref={scrollViewRef}
+          style={styles.scrollContainer}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+
+
           <View style={styles.editorContainer}>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <View style={styles.editorContent}>
-                {/* Line Numbers */}
-                <View style={styles.lineNumbers}>
-                  {codeLines.map((_, index) => (
-                    <Text key={index} style={styles.lineNumber}>
-                      {index + 1}
-                    </Text>
-                  ))}
-                </View>
-                
-                {/* Code */}
-                <View style={styles.codeArea}>
-                  {codeLines.map((line, index) => (
-                    <Text key={index} style={styles.codeLine}>
-                      {line === '|' ? (
-                        <Text style={styles.cursor}>|</Text>
-                      ) : (
-                        line
-                      )}
-                    </Text>
-                  ))}
-                </View>
-              </View>
-            </ScrollView>
-          </View>
-        </View>
-
-        {/* Keyboard Helper */}
-        <View style={styles.keyboardHelper}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View style={styles.keyboardRow}>
-              {['{', '}', '(', ')', '[', ']', ';', '=', 'tab'].map((key, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={[styles.keyButton, key === 'tab' && styles.tabKey]}
-                >
-                  <Text style={[styles.keyText, key === 'tab' && styles.tabKeyText]}>
-                    {key}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+            <View style={styles.highlightContainer}>
+              <SyntaxHighlighter
+                style={atomOneDark}
+                language="javascript"
+                wrapLines={true}
+                fontSize={20}
+                fontFamily={Platform.OS === 'ios' ? 'Menlo' : 'monospace'}
+                PreTag={View}
+                CodeTag={View}
+                customStyle={{
+                  padding: 16,
+                  margin: 0,
+                  backgroundColor: 'transparent',
+                  minHeight: containerHeight,
+                  lineHeight: 24,
+                }}
+                lineNumberStyle={{ color: '#608b74', paddingRight: 10 }}
+                showLineNumbers={false}
+              >
+                {code || ' '}
+              </SyntaxHighlighter>
             </View>
-          </ScrollView>
-        </View>
-      </ScrollView>
 
-      {/* Action Footer */}
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.testButton}>
-          <Text style={styles.testButtonIcon}>▶</Text>
-          <Text style={styles.testButtonText}>Test Run</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.submitButton}>
-          <Text style={styles.submitButtonIcon}>✓</Text>
-          <Text style={styles.submitButtonText}>Submit</Text>
-        </TouchableOpacity>
-      </View>
+
+            <TextInput
+              style={styles.textInput}
+              cursorColor="#00ff0dff"
+              selectionColor="rgba(0, 255, 64, 0.98)"
+              multiline
+              value={code}
+              onChangeText={handleCodeChange}
+              textAlignVertical="top"
+              autoCapitalize="none"
+              autoCorrect={false}
+              spellCheck={false}
+              placeholder="Write your code here..."
+              placeholderTextColor="#6a996a"
+              onFocus={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
+              onContentSizeChange={(e) => {
+
+                const maxHeight = Dimensions.get('window').height * 0.6;
+                const newHeight = Math.min(maxHeight, e.nativeEvent.contentSize.height);
+                setContainerHeight(Math.max(300, newHeight + 20));
+              }}
+
+            />
+
+          </View>
+
+          <View style={styles.testCasesContainer}>
+            <View style={styles.tabsContainer}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Ionicons name="flask-outline" size={20} color="#ff8c00" style={{ marginRight: 8 }} />
+                <Text style={styles.sectionTitle}>Test Cases</Text>
+              </View>
+            </View>
+
+            <View style={styles.tabHeader}>
+              <TouchableOpacity
+                style={[styles.tabItem, activeTab === 'case1' && styles.activeTabItem]}
+                onPress={() => setActiveTab('case1')}
+              >
+                <Text style={[styles.tabText, activeTab === 'case1' && styles.activeTabText]}>Case 1</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.tabItem, activeTab === 'case2' && styles.activeTabItem]}
+                onPress={() => setActiveTab('case2')}
+              >
+                <Text style={[styles.tabText, activeTab === 'case2' && styles.activeTabText]}>Case 2</Text>
+              </TouchableOpacity>
+
+            </View>
+
+            <View style={styles.caseContent}>
+              <Text style={styles.label}>Input</Text>
+              <View style={styles.readOnlyInput}>
+
+                <Text style={styles.readOnlyText}>
+                  {activeTab === 'case1'
+                    ? Item.example1_input
+                    : Item.example2_input}
+                </Text>
+              </View>
+
+
+              <Text style={styles.label}>Expected Output</Text>
+              <View style={styles.readOnlyInput}>
+                <Text style={styles.readOnlyText}>
+                  {activeTab === 'case1' ? Item.example1_output : Item.example2_output}
+                </Text>
+              </View>
+            </View>
+          </View>
+        </ScrollView>
+
+
+        <View style={styles.footer}>
+          <TouchableOpacity
+            style={styles.submitButton}
+            onPress={() => {
+              Keyboard.dismiss();
+              console.log('Submitting code:', code);
+            }}
+          >
+            <Text style={styles.submitButtonText}>Submit Solution</Text>
+            <Ionicons name="play" size={16} color="#000" style={{ marginLeft: 5 }} />
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
+
+
+
+export default CodeEditor;
 
 const styles = StyleSheet.create({
   container: {
@@ -183,306 +227,525 @@ const styles = StyleSheet.create({
     backgroundColor: '#102217',
   },
   header: {
-    backgroundColor: 'rgba(16, 34, 23, 0.95)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
-    paddingBottom: rh(1),
+    borderBottomColor: '#2C3E33',
   },
-  topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: rw(4),
-    paddingTop: rh(1),
-    paddingBottom: rh(1),
+  backButton: {
+    marginRight: 12,
   },
-  iconButton: {
-    width: rw(10),
-    height: rw(10),
-    borderRadius: rw(5),
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  primaryIconButton: {
-    backgroundColor: 'rgba(43, 238, 121, 0.1)',
-  },
-  iconText: {
-    fontSize: rf(3),
+  headerTitle: {
     color: '#fff',
-  },
-  primaryIconText: {
-    fontSize: rf(2.5),
-    color: '#2bee79',
-  },
-  title: {
-    fontSize: rf(2.2),
-    fontWeight: 'bold',
-    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
     flex: 1,
-    textAlign: 'center',
+    marginRight: 8,
   },
-  hudContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 12,
-    paddingHorizontal: rw(4),
-    paddingBottom: rh(1),
-  },
-  statPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#1a2e22',
-    borderRadius: 20,
-    paddingHorizontal: rw(3),
-    paddingVertical: rh(0.8),
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
-    gap: 8,
-  },
-  timerIcon: {
-    fontSize: rf(2),
-    color: '#2bee79',
-  },
-  timerText: {
-    fontSize: rf(1.8),
-    fontWeight: 'bold',
-    color: '#fff',
-    fontFamily: 'monospace',
-  },
-  rankLabel: {
-    fontSize: rf(1.3),
-    color: '#9ca3af',
-    fontWeight: '500',
-  },
-  rankValue: {
-    fontSize: rf(1.8),
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  rankChange: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 2,
-  },
-  rankArrow: {
-    fontSize: rf(1.5),
-    color: '#2bee79',
-    fontWeight: 'bold',
-  },
-  rankChangeValue: {
-    fontSize: rf(1.3),
-    color: '#2bee79',
-    fontWeight: 'bold',
-  },
-  mainContent: {
-    flex: 1,
-  },
-  section: {
-    paddingHorizontal: rw(4),
-    paddingTop: rh(2),
-  },
-  objectivesCard: {
-    backgroundColor: '#1a2e22',
-    borderRadius: 16,
-    padding: rw(4),
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  objectivesHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: rh(1.5),
-  },
-  objectivesTitle: {
-    fontSize: rf(1.4),
-    fontWeight: 'bold',
-    color: '#9ca3af',
-  },
-  progressBadge: {
-    backgroundColor: 'rgba(43, 238, 121, 0.2)',
-    paddingHorizontal: rw(2),
-    paddingVertical: rh(0.3),
-    borderRadius: 12,
-  },
-  progressText: {
-    fontSize: rf(1.3),
-    color: '#2bee79',
-    fontWeight: 'bold',
-  },
-  checklistItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: rh(1.2),
-    gap: 12,
-  },
-  checkbox: {
-    width: rw(5),
-    height: rw(5),
+  badge: {
+    backgroundColor: '#2C3E33',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     borderRadius: 4,
-    borderWidth: 2,
-    borderColor: '#326747',
-    backgroundColor: 'transparent',
-    alignItems: 'center',
-    justifyContent: 'center',
+    marginRight: 10,
   },
-  checkboxChecked: {
-    backgroundColor: '#2bee79',
-    borderColor: '#2bee79',
-  },
-  checkmark: {
-    fontSize: rf(1.5),
-    color: '#102217',
+  badgeText: {
+    color: '#FFD700',
+    fontSize: 12,
     fontWeight: 'bold',
   },
-  checklistText: {
-    fontSize: rf(1.6),
-    color: '#d1d5db',
+  headerRightIcons: {
+    flexDirection: 'row',
+  },
+  keyboardContainer: {
     flex: 1,
   },
-  checklistTextChecked: {
-    color: '#6b7280',
-    textDecorationLine: 'line-through',
+  scrollContainer: {
+    flex: 1,
+    backgroundColor: '#0d1a12',
   },
-  editorHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: rh(1),
-  },
-  fileName: {
-    fontSize: rf(1.3),
-    color: '#9ca3af',
-    fontFamily: 'monospace',
-  },
-  autoSaved: {
-    fontSize: rf(1.3),
-    color: '#2bee79',
-    opacity: 0.8,
-    fontFamily: 'monospace',
+  scrollContent: {
+    paddingBottom: 100,
   },
   editorContainer: {
-    backgroundColor: '#0b1610',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    minHeight: rh(35),
-  },
-  editorContent: {
-    flexDirection: 'row',
-  },
-  lineNumbers: {
-    backgroundColor: '#0f1d16',
-    borderRightWidth: 1,
-    borderRightColor: 'rgba(255, 255, 255, 0.05)',
-    paddingVertical: rh(2),
-    paddingHorizontal: rw(3),
-  },
-  lineNumber: {
-    fontSize: rf(1.5),
-    color: '#6b7280',
-    fontFamily: 'monospace',
-    lineHeight: rf(2.5),
-    textAlign: 'right',
-  },
-  codeArea: {
-    paddingVertical: rh(2),
-    paddingHorizontal: rw(4),
-  },
-  codeLine: {
-    fontSize: rf(1.5),
-    color: '#d1d5db',
-    fontFamily: 'monospace',
-    lineHeight: rf(2.5),
-  },
-  cursor: {
-    color: '#2bee79',
-  },
-  keyboardHelper: {
-    backgroundColor: '#15261d',
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
-    paddingVertical: rh(1),
-    marginTop: rh(2),
-  },
-  keyboardRow: {
-    flexDirection: 'row',
-    paddingHorizontal: rw(3),
-    gap: 8,
-  },
-  keyButton: {
-    height: rh(5),
-    minWidth: rw(10),
-    backgroundColor: '#234832',
+    margin: 16,
     borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: rw(3),
+    overflow: 'hidden',
+    backgroundColor: '#0d1a12',
+    position: 'relative',
+    borderWidth: 1,
+    borderColor: '#2C3E33',
   },
-  tabKey: {
-    backgroundColor: '#234832',
+  highlightContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
-  keyText: {
-    fontSize: rf(2),
-    color: '#fff',
-    fontFamily: 'monospace',
-    fontWeight: '500',
+  textInput: {
+    color: 'rgba(0, 0, 0, 0)',
+    backgroundColor: 'transparent',
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+    fontSize: 20,
+    lineHeight: 24,
+    minHeight: 300,
+    padding: 16,
+    paddingTop: 16, 
+    textAlignVertical: 'top',
+    width: '100%',
+    opacity: Platform.OS === 'android' ? 0.01 : 1,
+    ...Platform.select({
+      ios: {
+      
+        tintColor: 'transparent',
+      },
+      android: {
+        textAlignVertical: 'top',
+        includeFontPadding: false,
+        
+      },
+    }),
   },
-  tabKeyText: {
-    color: '#2bee79',
-    fontWeight: 'bold',
-  },
-  footer: {
-    flexDirection: 'row',
-    paddingHorizontal: rw(4),
-    paddingVertical: rh(2),
-    paddingBottom: rh(3),
-    backgroundColor: '#102217',
+  testCasesContainer: {
+    padding: 16,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.05)',
+    borderTopColor: '#2C3E33',
+  },
+  tabsContainer: {
+    marginBottom: 10,
+  },
+  sectionTitle: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold'
+  },
+  tabHeader: {
+    flexDirection: 'row',
+    marginBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#333',
+  },
+  tabItem: {
+    marginRight: 20,
+    paddingBottom: 8,
+  },
+  activeTabItem: {
+    borderBottomWidth: 2,
+    borderBottomColor: '#ff8c00',
+  },
+  tabText: {
+    color: '#888',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  activeTabText: {
+    color: '#fff',
+  },
+  caseContent: {
     gap: 12,
   },
-  testButton: {
-    flex: 1,
-    height: rh(7),
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 25,
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-    gap: 8,
-  },
-  testButtonIcon: {
-    fontSize: rf(2.2),
+  label: {
     color: '#fff',
+    fontSize: 14,
+    marginBottom: 4,
   },
-  testButtonText: {
-    fontSize: rf(1.8),
-    color: '#fff',
-    fontWeight: 'bold',
+  readOnlyInput: {
+    backgroundColor: '#1C2E24',
+    padding: 12,
+    borderRadius: 8,
+  },
+  readOnlyText: {
+    color: '#ccc',
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+    fontSize: 13,
+  },
+  footer: {
+    padding: 16,
+    backgroundColor: '#102217',
+    borderTopWidth: 1,
+    borderTopColor: '#2C3E33',
+    paddingBottom: Platform.OS === 'ios' ? 34 : 16,
   },
   submitButton: {
-    flex: 2,
-    height: rh(7),
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: '#00ff55ff',
     borderRadius: 25,
-    backgroundColor: '#2bee79',
-    gap: 8,
-  },
-  submitButtonIcon: {
-    fontSize: rf(2.5),
-    color: '#102217',
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
   },
   submitButtonText: {
-    fontSize: rf(2),
-    color: '#102217',
+    color: '#000',
+    fontSize: 16,
     fontWeight: 'bold',
-  },
+  }
 });
 
-export default App;
+
+
+
+
+
+
+
+
+
+// import { Ionicons } from '@expo/vector-icons';
+// import { useRouter } from 'expo-router';
+// import React, { useEffect, useRef, useState } from 'react';
+// import {
+//   Dimensions,
+//   Keyboard,
+//   KeyboardAvoidingView,
+//   Platform,
+//   ScrollView,
+//   StyleSheet,
+//   Text,
+//   TextInput,
+//   TouchableOpacity,
+//   View
+// } from 'react-native';
+
+// import { SafeAreaView } from 'react-native-safe-area-context';
+// import SyntaxHighlighter from 'react-native-syntax-highlighter';
+// import { atomOneDark } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+
+// const CodeEditor = () => {
+//   const navigation = useRouter();
+//   const scrollViewRef = useRef<ScrollView>(null);
+//   const windowWidth = Dimensions.get('window').width;
+//   const [code, setCode] = useState<string>(`class Solution {
+//   /**
+//    * Find the maximum dot product of two
+//    * non-empty subsequences.
+//    * @param {number[]} arrA - first integer array
+//    * @param {number[]} arrB - second integer array
+//    * @returns {number} maximum possible dot product
+//    */
+//   maxDotProduct(arrA, arrB) {
+//     // Your implementation here
+//     return 0;
+//   }
+// }`);
+//   const [activeTab, setActiveTab] = useState<'case1' | 'case2'>('case1');
+//   const [containerHeight, setContainerHeight] = useState(300);
+
+//   const handleCodeChange = (newCode: string) => {
+//     setCode(newCode);
+//     setTimeout(() => {
+//       scrollViewRef.current?.scrollToEnd({ animated: true });
+//     }, 50);
+//   };
+
+//   useEffect(() => {
+//     const lines = code.split('\n').length;
+//     const newHeight = Math.max(300, lines * 24 + 40);
+//     setContainerHeight(newHeight);
+//   }, [code]);
+
+//   return (
+//     <SafeAreaView style={styles.container}>
+//       <View style={styles.header}>
+//         <TouchableOpacity onPress={() => navigation.back()} style={styles.backButton}>
+//           <Ionicons name="arrow-back" size={24} color="#fff" />
+//         </TouchableOpacity>
+//         <Text style={styles.headerTitle}>Max Dot Product of Two Subsequences</Text>
+//         <View style={styles.badge}>
+//           <Text style={styles.badgeText}>JS JavaScript</Text>
+//         </View>
+//         <View style={styles.headerRightIcons}>
+//           <Ionicons name="copy-outline" size={20} color="#ccc" style={{ marginRight: 15 }} />
+//           <Ionicons name="refresh-outline" size={20} color="#ccc" />
+//         </View>
+//       </View>
+
+//       <KeyboardAvoidingView
+//         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+//         keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+//         style={styles.keyboardContainer}
+//       >
+//         <ScrollView
+//           ref={scrollViewRef}
+//           style={styles.scrollContainer}
+//           contentContainerStyle={styles.scrollContent}
+//           keyboardShouldPersistTaps="handled"
+//         >
+//           <View style={styles.editorContainer}>
+//             {/* Syntax Highlighter Layer - Shows colored code */}
+//             <View style={styles.highlightContainer} pointerEvents="none">
+//               <SyntaxHighlighter
+//                 style={atomOneDark}
+//                 language="javascript"
+//                 wrapLines={true}
+//                 fontSize={20}
+//                 fontFamily={Platform.OS === 'ios' ? 'Menlo' : 'monospace'}
+//                 PreTag={View}
+//                 CodeTag={View}
+//                 customStyle={{
+//                   padding: 16,
+//                   margin: 0,
+//                   backgroundColor: 'transparent',
+//                   minHeight: containerHeight,
+//                   lineHeight: 24,
+//                 }}
+//                 lineNumberStyle={{ color: '#608b74', paddingRight: 10 }}
+//                 showLineNumbers={false}
+//               >
+//                 {code || ' '}
+//               </SyntaxHighlighter>
+//             </View>
+
+//             {/* Invisible TextInput Layer - Handles input/cursor/selection */}
+//             <TextInput
+//               style={[styles.textInput, { minHeight: containerHeight }]}
+//               cursorColor="#ff8c00"
+//               selectionColor="rgba(255, 140, 0, 0.3)"
+//               multiline
+//               value={code}
+//               onChangeText={handleCodeChange}
+//               textAlignVertical="top"
+//               autoCapitalize="none"
+//               autoCorrect={false}
+//               spellCheck={false}
+//               placeholder=""
+//               placeholderTextColor="transparent"
+//               onFocus={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
+//               onContentSizeChange={(e) => {
+//                 const maxHeight = Dimensions.get('window').height * 0.6;
+//                 const newHeight = Math.min(maxHeight, e.nativeEvent.contentSize.height);
+//                 setContainerHeight(Math.max(300, newHeight + 20));
+//               }}
+
+
+//               caretHidden={false}
+//               contextMenuHidden={false}
+//             />
+//           </View>
+
+//           <View style={styles.testCasesContainer}>
+//             <View style={styles.tabsContainer}>
+//               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+//                 <Ionicons name="flask-outline" size={20} color="#ff8c00" style={{ marginRight: 8 }} />
+//                 <Text style={styles.sectionTitle}>Test Cases</Text>
+//               </View>
+//             </View>
+
+//             <View style={styles.tabHeader}>
+//               <TouchableOpacity
+//                 style={[styles.tabItem, activeTab === 'case1' && styles.activeTabItem]}
+//                 onPress={() => setActiveTab('case1')}
+//               >
+//                 <Text style={[styles.tabText, activeTab === 'case1' && styles.activeTabText]}>Case 1</Text>
+//               </TouchableOpacity>
+//               <TouchableOpacity
+//                 style={[styles.tabItem, activeTab === 'case2' && styles.activeTabItem]}
+//                 onPress={() => setActiveTab('case2')}
+//               >
+//                 <Text style={[styles.tabText, activeTab === 'case2' && styles.activeTabText]}>Case 2</Text>
+//               </TouchableOpacity>
+//             </View>
+
+//             <View style={styles.caseContent}>
+//               <Text style={styles.label}>Input</Text>
+//               <View style={styles.readOnlyInput}>
+//                 <Text style={styles.readOnlyText}>
+//                   {activeTab === 'case1'
+//                     ? '{"arrA":[2,1,-2,5], "arrB":[3,0,-6]}'
+//                     : '{"arrA":[3,-2], "arrB":[2,-6,7]}'}
+//                 </Text>
+//               </View>
+
+//               <Text style={styles.label}>Expected Output</Text>
+//               <View style={styles.readOnlyInput}>
+//                 <Text style={styles.readOnlyText}>
+//                   {activeTab === 'case1' ? '18' : '21'}
+//                 </Text>
+//               </View>
+//             </View>
+//           </View>
+//         </ScrollView>
+
+//         <View style={styles.footer}>
+//           <TouchableOpacity
+//             style={styles.submitButton}
+//             onPress={() => {
+//               Keyboard.dismiss();
+//               console.log('Submitting code:', code);
+//             }}
+//           >
+//             <Text style={styles.submitButtonText}>Submit Solution</Text>
+//             <Ionicons name="play" size={16} color="#000" style={{ marginLeft: 5 }} />
+//           </TouchableOpacity>
+//         </View>
+//       </KeyboardAvoidingView>
+//     </SafeAreaView>
+//   );
+// };
+
+// export default CodeEditor;
+
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     backgroundColor: '#102217',
+//   },
+//   header: {
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//     padding: 16,
+//     borderBottomWidth: 1,
+//     borderBottomColor: '#2C3E33',
+//   },
+//   backButton: {
+//     marginRight: 12,
+//   },
+//   headerTitle: {
+//     color: '#fff',
+//     fontSize: 16,
+//     fontWeight: '600',
+//     flex: 1,
+//     marginRight: 8,
+//   },
+//   badge: {
+//     backgroundColor: '#2C3E33',
+//     paddingHorizontal: 8,
+//     paddingVertical: 4,
+//     borderRadius: 4,
+//     marginRight: 10,
+//   },
+//   badgeText: {
+//     color: '#FFD700',
+//     fontSize: 12,
+//     fontWeight: 'bold',
+//   },
+//   headerRightIcons: {
+//     flexDirection: 'row',
+//   },
+//   keyboardContainer: {
+//     flex: 1,
+//   },
+//   scrollContainer: {
+//     flex: 1,
+//     backgroundColor: '#0d1a12',
+//   },
+//   scrollContent: {
+//     paddingBottom: 100,
+//   },
+//   editorContainer: {
+//     margin: 16,
+//     borderRadius: 8,
+//     overflow: 'hidden',
+//     backgroundColor: '#0d1a12',
+//     position: 'relative',
+//     borderWidth: 1,
+//     borderColor: '#2C3E33',
+//   },
+//   highlightContainer: {
+//     position: 'absolute',
+//     top: 0,
+//     left: 0,
+//     right: 0,
+//     bottom: 0,
+//   },
+//   textInput: {
+//     // Use rgba with 0 opacity instead of 'transparent' keyword
+//     color: 'rgba(0, 0, 0, 0)',
+//     backgroundColor: 'transparent',
+//     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+//     fontSize: 20,
+//     lineHeight: 24,
+//     minHeight: 300,
+//     padding: 16,
+//     paddingTop: 16,
+//     textAlignVertical: 'top',
+//     width: '100%',
+//     // SOLUTION: Use opacity to hide text while keeping cursor visible
+//     opacity: Platform.OS === 'android' ? 0.01 : 1,
+//     ...Platform.select({
+//       ios: {
+//         // On iOS, we can use tintColor to hide text
+//         tintColor: 'transparent',
+//       },
+//       android: {
+//         textAlignVertical: 'top',
+//         includeFontPadding: false,
+//         // Very low opacity hides text but keeps cursor
+//       },
+//     }),
+//   },
+//   testCasesContainer: {
+//     padding: 16,
+//     borderTopWidth: 1,
+//     borderTopColor: '#2C3E33',
+//   },
+//   tabsContainer: {
+//     marginBottom: 10,
+//   },
+//   sectionTitle: {
+//     color: '#fff',
+//     fontSize: 16,
+//     fontWeight: 'bold'
+//   },
+//   tabHeader: {
+//     flexDirection: 'row',
+//     marginBottom: 16,
+//     borderBottomWidth: 1,
+//     borderBottomColor: '#333',
+//   },
+//   tabItem: {
+//     marginRight: 20,
+//     paddingBottom: 8,
+//   },
+//   activeTabItem: {
+//     borderBottomWidth: 2,
+//     borderBottomColor: '#ff8c00',
+//   },
+//   tabText: {
+//     color: '#888',
+//     fontSize: 14,
+//     fontWeight: '600',
+//   },
+//   activeTabText: {
+//     color: '#fff',
+//   },
+//   caseContent: {
+//     gap: 12,
+//   },
+//   label: {
+//     color: '#fff',
+//     fontSize: 14,
+//     marginBottom: 4,
+//   },
+//   readOnlyInput: {
+//     backgroundColor: '#1C2E24',
+//     padding: 12,
+//     borderRadius: 8,
+//   },
+//   readOnlyText: {
+//     color: '#ccc',
+//     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+//     fontSize: 13,
+//   },
+//   footer: {
+//     padding: 16,
+//     backgroundColor: '#102217',
+//     borderTopWidth: 1,
+//     borderTopColor: '#2C3E33',
+//     paddingBottom: Platform.OS === 'ios' ? 34 : 16,
+//   },
+//   submitButton: {
+//     backgroundColor: '#ff8c00',
+//     borderRadius: 25,
+//     height: 50,
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//     flexDirection: 'row',
+//   },
+//   submitButtonText: {
+//     color: '#000',
+//     fontSize: 16,
+//     fontWeight: 'bold',
+//   }
+// });

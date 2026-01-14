@@ -1,96 +1,176 @@
 import { SpaceGrotesk_300Light, SpaceGrotesk_400Regular, SpaceGrotesk_500Medium, SpaceGrotesk_600SemiBold, SpaceGrotesk_700Bold, useFonts } from '@expo-google-fonts/space-grotesk';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    Image,
-    ScrollView,
+    FlatList,
     StatusBar,
     StyleSheet,
-    Switch,
     Text,
     TextInput,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native';
+
 import { responsiveHeight as hp, responsiveFontSize as rf, responsiveWidth as wp } from 'react-native-responsive-dimensions';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-// Card width calculated responsively (screen width - padding) / 2
+
 const cardWidth = (wp(100) - wp(12)) / 2;
 
-// Language data
-const languages = [
+
+const Question = [
+
     {
         id: 1,
-        name: 'Python',
-        level: 'Intermediate',
-        progress: 45,
-        isStarted: true,
-        isFavorite: true,
-        icon: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCC53xLTDK5B2SBTSA26nDfoOWL0EcNO1r-Kv3132PG5wLkTkw4ydqPhM52wfBX1EmRJecM43V6N_u-91tQoGf8_gXRNpNsQI9oizKfJfimng8AHuK5RimvjWgTDz14Em9zvn2hc5kwyRf73BxliifTSSkoB30AHXflTM9osx0mUtQsi08K1A2gdgMIwxMGOQQN8_3d8xDKmnglh1KSfDWVxOfgd7paeah_YB142EBoh65zZbv_hBJJ7ERkV-VshlEvVMX5_tmNRWY',
+        question: "Two Sum",
+        hint1: "A brute force approach would be to check every possible pair of numbers, but that is O(n²).",
+        hint2: "Try using a Hash Map to store the value and its index as you iterate through the array.",
+        example1_input: "nums = [2,7,11,15], target = 9",
+        example1_output: "[0,1]",
+        example2_input: "nums = [3,2,4], target = 6",
+        example2_output: "[1,2]",
+        level: "easy",
+        discription: "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target. You may assume that each input would have exactly one solution, and you may not use the same element twice."
     },
     {
         id: 2,
-        name: 'JavaScript',
-        level: 'Beginner Friendly',
-        progress: 0,
-        isStarted: false,
-        isFavorite: false,
-        description: 'Essential for modern web development.',
-        badge: { icon: 'flash', color: '#eab308' },
-        icon: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDGTwiNcc33G-eQsGymvrNqgKB45ruMOvwOS2lmGv3XoCL_0JlwPIW3KJ_8AFB2FIvXWF8L7vMQURbLcXmU7BoCHh1I9Vve6fSE6PnWHwUVgjDOvX0SAp0K4OqmSghnfRU5TaZi--Og6ILEUqrWwBQgWDJdSs-YqLj008L8DwsRVJJ773LzDuEhr1NPHgVuprFQBOz630sdjPESOYdNWIAVrHAqREN45lIAjjzK3WuaqctcqfpaXJ05Ta7jUXBkdMggQl8Sltc0vPE',
+        question: "Valid Parentheses",
+        hint1: "Use a stack data structure to keep track of opening brackets.",
+        hint2: "When you encounter a closing bracket, check if it matches the bracket at the top of the stack.",
+        example1_input: "s = \"()\"",
+        example1_output: "true",
+        example2_input: "s = \"(]\"",
+        example2_output: "false",
+        level: "easy",
+        discription: "Given a string s containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid. An input string is valid if brackets are closed by the same type of brackets and closed in the correct order."
     },
     {
         id: 3,
-        name: 'Rust',
-        level: 'Hard',
-        progress: 0,
-        isStarted: false,
-        isFavorite: false,
-        description: 'Performance and safety for systems.',
-        badge: { icon: 'barbell', color: '#f97316' },
-        icon: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBOa24-I0tFjWL3MtJ2mZ1_rJzndEpZY2sE59M7SITBNQDzY64dIjz85LEkTnFvAjj3-UzgusRXFg8KVd_5ofxX0jpLXM3Ew68gbbv_jlrxwPI8DLsQCSj2XRT7QmSqgGc6Ex-OlyJ9KPt7v4oCcVVkZ5P8r9iIkKruMj84D_okJTcjwR9tOyMt6uQEEGrk0abKYL-F1xY1P289bYmP8YQXBrzULOxr6inEJ-XgluApZcJc_1ZS1wxA51xzbhPhEJWJFIhzS9cYc9c',
-        invertIcon: true,
+        question: "Longest Substring Without Repeating Characters",
+        hint1: "Use a sliding window with two pointers (left and right).",
+        hint2: "Use a Set or Map to keep track of characters currently in your window to detect duplicates quickly.",
+        example1_input: "s = \"abcabcbb\"",
+        example1_output: "3",
+        example2_input: "s = \"bbbbb\"",
+        example2_output: "1",
+        level: "medium",
+        discription: "Given a string s, find the length of the longest substring without repeating characters."
     },
     {
         id: 4,
-        name: 'Swift',
-        level: 'Mobile',
-        progress: 0,
-        isStarted: false,
-        isFavorite: false,
-        description: 'Build powerful apps for iOS.',
-        badge: { icon: 'phone-portrait', color: '#60a5fa' },
-        icon: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBW-4GgWqp9nWi2LqNGbIxqqBy7zKflFL9okoKDZqcIehsh7vpiaoZdmgiV3bQnqoLw0OuiDoa49yTHVP1CnbXndSeN5NxChUQDYsDS9x5oMrkyuNq2wSv2bANTdgDbuHEbvhtvEuMMXV6FiHf6q0ury16F1uZaTR1euhVZylfUgA768Zz1qvOzGjCfhcsMQ15jtfvC8IHEgyTpw_pdGX1nsmRBfYptLfMTrhRIfTfw8EfRaUxgECwRk3GB6KOqTTQsZZS68gF53LA',
+        question: "Container With Most Water",
+        hint1: "The area is determined by the shorter of the two lines and the distance between them.",
+        hint2: "Start with two pointers at the far ends of the array and move the pointer pointing to the shorter line inward.",
+        example1_input: "height = [1,8,6,2,5,4,8,3,7]",
+        example1_output: "49",
+        example2_input: "height = [1,1]",
+        example2_output: "1",
+        level: "medium",
+        discription: "You are given an integer array height of length n. Find two lines that together with the x-axis form a container, such that the container contains the most water. Return the maximum amount of water a container can store."
     },
     {
         id: 5,
-        name: 'Go',
-        level: 'Backend',
-        progress: 0,
-        isStarted: false,
-        isFavorite: false,
-        description: 'Scalable systems and cloud tools.',
-        badge: { icon: 'server', color: '#22d3ee' },
-        icon: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCn36zAr3nVxs6O8BWBmjKd8dAtb4i-e3-0zT73d6TaVEq67AkrhVYyjM6rCEdu4QSFClOYh_AteHOjYU8RaYcmgtLC7FALypWFAjjaYwW8V6XM99S8Qz0uA6ljaGOGBjBOFHIG2V6TwYpHFQr65yIp7JDpT9Jk_a_GfQXa9JOQj0Ioht7TARWIt7IvmDnJ1ZwZbowKVD6Ol5IISlg9XUT0PWmGi7hYSE-JP7nvM_5bvt-fLAhI_0gL9zzMzDAfMJl0JbiLxXecx8E',
+        question: "Trapping Rain Water",
+        hint1: "For each bar, the water it can hold is determined by the minimum of the maximum heights to its left and right.",
+        hint2: "You can pre-calculate the left-max and right-max for every index, or use a two-pointer approach to save space.",
+        example1_input: "height = [0,1,0,2,1,0,1,3,2,1,2,1]",
+        example1_output: "6",
+        example2_input: "height = [4,2,0,3,2,5]",
+        example2_output: "9",
+        level: "hard",
+        discription: "Given n non-negative integers representing an elevation map where the width of each bar is 1, compute how much water it can trap after raining."
     },
+
     {
         id: 6,
-        name: 'C++',
-        level: 'Advanced',
-        progress: 12,
-        isStarted: true,
-        isFavorite: true,
-        icon: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBJ1ZtxLoVq_36KwztRzrbpYckwMq4x1Lv6MbgimUsaD30Fs1EQZFCtsnV2qr0vC5chrUHLCgynyBeWtlX3NELqjaybFFkvU9JbK75iYrRdCBlNY3DEqUCYB0Twp0c50EAv2dv4C_sBh8hyMVm5A7wqQYxAGRr3C5ZYlXDKHBbZitaSLC9FSAUGFMvX670hnEJ_X3q08mJ4Gzgi0lXdPQpDZXopIxmmzBvGTn2IN5cAzLOpgW5ZoYD-ngO_mw2cjcSCP4LzrUk49DY',
+        question: "Best Time to Buy and Sell Stock",
+        hint1: "You want to find the maximum difference between a later price and an earlier price.",
+        hint2: "Iterate through the array once, keeping track of the minimum price seen so far and the maximum profit you could make today.",
+        example1_input: "prices = [7,1,5,3,6,4]",
+        example1_output: "5",
+        example2_input: "prices = [7,6,4,3,1]",
+        example2_output: "0",
+        level: "easy",
+        discription: "You are given an array prices where prices[i] is the price of a given stock on the ith day. You want to maximize your profit by choosing a single day to buy one stock and choosing a different day in the future to sell that stock. Return the maximum profit you can achieve from this transaction."
     },
-];
+    {
+        id: 7,
+        question: "Search in Rotated Sorted Array",
+        hint1: "Even though the array is rotated, one half of the array (split by the middle element) will always be sorted.",
+        hint2: "Use binary search. Check which side is sorted and determine if the target lies within that range.",
+        example1_input: "nums = [4,5,6,7,0,1,2], target = 0",
+        example1_output: "4",
+        example2_input: "nums = [4,5,6,7,0,1,2], target = 3",
+        example2_output: "-1",
+        level: "medium",
+        discription: "There is an integer array nums sorted in ascending order (with distinct values). Prior to being passed to your function, nums is possibly rotated at an unknown pivot index. Given the array nums after the possible rotation and an integer target, return the index of target if it is in nums, or -1 if it is not in nums."
+    },
+    {
+        id: 8,
+        question: "Merge Intervals",
+        hint1: "First, sort the intervals based on their start times.",
+        hint2: "Iterate through the sorted intervals. If the current interval overlaps with the previous one, merge them by updating the end time.",
+        example1_input: "intervals = [[1,3],[2,6],[8,10],[15,18]]",
+        example1_output: "[[1,6],[8,10],[15,18]]",
+        example2_input: "intervals = [[1,4],[4,5]]",
+        example2_output: "[[1, 5]]",
+        level: "medium",
+        discription: "Given an array of intervals where intervals[i] = [starti, endi], merge all overlapping intervals, and return an array of the non-overlapping intervals that cover all the intervals in the input."
+    },
+    {
+        id: 9,
+        question: "Word Search",
+        hint1: "This is a classic backtracking problem using Depth First Search (DFS).",
+        hint2: "From each cell, explore all four directions and mark cells as visited (or change the character) to avoid using the same cell twice in one path.",
+        example1_input: "board = [[\"A\",\"B\",\"C\",\"E\"],[\"S\",\"F\",\"C\",\"S\"],[\"A\",\"D\",\"E\",\"E\"]], word = \"ABCCED\"",
+        example1_output: "true",
+        example2_input: "board = [[\"A\",\"B\",\"C\",\"E\"],[\"S\",\"F\",\"C\",\"S\"],[\"A\",\"D\",\"E\",\"E\"]], word = \"ABCB\"",
+        example2_output: "false",
+        level: "medium",
+        discription: "Given an m x n grid of characters board and a string word, return true if word exists in the grid. The word can be constructed from letters of sequentially adjacent cells, where adjacent cells are horizontally or vertically neighboring."
+    },
+    {
+        id: 10,
+        question: "Median of Two Sorted Arrays",
+        hint1: "The brute force O(m+n) is easy; the challenge is achieving O(log(m+n)).",
+        hint2: "Use binary search to partition the two arrays such that the left side contains the smaller half of the combined elements.",
+        example1_input: "nums1 = [1,3], nums2 = [2]",
+        example1_output: "2.0",
+        example2_input: "nums1 = [1,2], nums2 = [3,4]",
+        example2_output: "2.5",
+        level: "hard",
+        discription: "Given two sorted arrays nums1 and nums2 of size m and n respectively, return the median of the two sorted arrays. The overall run time complexity should be O(log (m+n))."
+    }
+
+]
+
+interface data {
+    id: number,
+    question: string,
+    hint1: string,
+    hint2: string,
+    example1_input: string,
+    example1_output: string,
+    example2_input: string,
+    example2_output: string,
+    level: string,
+    discription: string,
+
+}
 
 const categories = ['All', 'Popular', 'Web Dev', 'Mobile', 'Data Science', 'Systems'];
-
+interface Question {
+    id: number;
+    question: string;
+    level: string;
+    progress: string;
+}
 export default function Practice() {
     const [searchQuery, setSearchQuery] = useState('');
     const [myLanguagesOnly, setMyLanguagesOnly] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState('All');
+    const router = useRouter();
 
     let [fontsLoaded] = useFonts({
         SpaceGrotesk_300Light,
@@ -108,17 +188,12 @@ export default function Practice() {
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="light-content" backgroundColor="#102217" />
 
-            {/* Header */}
             <View style={styles.header}>
                 <View style={styles.topBar}>
-                    <TouchableOpacity style={styles.backButton}>
-                        <Ionicons name="arrow-back" size={rf(3.5)} color="#fff" />
-                    </TouchableOpacity>
-                    <Text style={styles.headerTitle}>Languages</Text>
+                    
                     <View style={styles.spacer} />
                 </View>
 
-                {/* Search Bar */}
                 <View style={styles.searchContainer}>
                     <View style={styles.searchBar}>
                         <Ionicons name="search" size={rf(3)} color="#92c9a8" style={styles.searchIcon} />
@@ -133,140 +208,31 @@ export default function Practice() {
                 </View>
             </View>
 
-            <ScrollView
-                style={styles.scrollView}
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={styles.scrollContent}
-            >
-                {/* Toggle & Sort Section */}
-                <View style={styles.toggleSortSection}>
-                    <View style={styles.toggleContainer}>
-                        <Text style={styles.toggleLabel}>My Languages</Text>
-                        <Switch
-                            value={myLanguagesOnly}
-                            onValueChange={setMyLanguagesOnly}
-                            trackColor={{ false: '#1b3325', true: '#2bee79' }}
-                            thumbColor="#fff"
-                            ios_backgroundColor="#1b3325"
-                        />
-                    </View>
+            <FlatList
+                data={Question}
+                keyExtractor={(item) => item.id.toString()}
+                contentContainerStyle={{ paddingBottom: hp(5) }}
+                style={{ flex: 1 }}
+                renderItem={({ item }) => (
+                    <TouchableOpacity onPress={() => router.push({ pathname: '/Discription', params: { item: JSON.stringify(item) } })}>
+                        <View style={{ borderWidth: 1, borderColor: '#2C3E33', borderRadius: 10, padding: 16, marginHorizontal: 16, marginBottom: 12, backgroundColor: '#1C2E24' }}>
+                            <Text style={{ fontSize: rf(2), fontFamily: 'SpaceGrotesk_500Medium', color: '#fff', marginBottom: 4 }}>{item.question}</Text>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 }}>
+                                <View >
+                                    <Text style={{ fontSize: rf(1.8), fontFamily: 'SpaceGrotesk_500Medium', color: '#2bee79' }}>{item.level}</Text>
+                                </View>
 
-                    <TouchableOpacity style={styles.sortButton}>
-                        <Text style={styles.sortButtonText}>Recommended</Text>
-                        <Ionicons name="swap-vertical" size={rf(2.5)} color="#2bee79" />
+                            </View>
+                        </View>
                     </TouchableOpacity>
-                </View>
+                )}
+            />
 
-                {/* Categories Chips */}
-                <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    style={styles.categoriesScroll}
-                    contentContainerStyle={styles.categoriesContainer}
-                >
-                    {categories.map((category, index) => (
-                        <TouchableOpacity
-                            key={index}
-                            style={[
-                                styles.categoryChip,
-                                selectedCategory === category && styles.categoryChipActive,
-                            ]}
-                            onPress={() => setSelectedCategory(category)}
-                        >
-                            <Text
-                                style={[
-                                    styles.categoryText,
-                                    selectedCategory === category && styles.categoryTextActive,
-                                ]}
-                            >
-                                {category}
-                            </Text>
-                        </TouchableOpacity>
-                    ))}
-                </ScrollView>
 
-                {/* Language Cards Grid */}
-                <View style={styles.cardsGrid}>
-                    {languages.map((language) => (
-                        <LanguageCard key={language.id} language={language} />
-                    ))}
-                </View>
-
-                {/* Pagination Hint */}
-                <View style={styles.paginationHint}>
-                    <Text style={styles.paginationText}>Showing 6 of 42 languages</Text>
-                </View>
-            </ScrollView>
         </SafeAreaView>
     );
 }
 
-function LanguageCard({ language }: { language: typeof languages[0] }) {
-    return (
-        <TouchableOpacity style={styles.card} activeOpacity={0.95}>
-            {/* Favorite Star */}
-            <TouchableOpacity style={styles.favoriteButton}>
-                <Ionicons
-                    name={language.isFavorite ? 'star' : 'star-outline'}
-                    size={rf(2.8)}
-                    color={language.isFavorite ? '#2bee79' : '#4a6555'}
-                />
-            </TouchableOpacity>
-
-            {/* Icon Container */}
-            <View style={styles.iconContainer}>
-                <Image
-                    source={{ uri: language.icon }}
-                    style={[styles.languageIcon, language.invertIcon && styles.invertedIcon]}
-                />
-            </View>
-
-            {/* Language Name */}
-            <Text style={styles.languageName}>{language.name}</Text>
-
-            {/* Level Badge */}
-            <View style={styles.levelContainer}>
-                {language.badge && (
-                    <Ionicons name={language.badge.icon as any} size={rf(1.8)} color={language.badge.color} />
-                )}
-                <Text style={styles.levelText}>{language.level}</Text>
-            </View>
-
-            {/* Progress Bar or Description */}
-            {language.isStarted ? (
-                <>
-                    <View style={styles.progressBarContainer}>
-                        <View style={[styles.progressBar, { width: `${language.progress}%` }]} />
-                    </View>
-                    <Text style={styles.progressText}>{language.progress}% Complete</Text>
-                </>
-            ) : (
-                language.description && (
-                    <Text style={styles.descriptionText} numberOfLines={2}>
-                        {language.description}
-                    </Text>
-                )
-            )}
-
-            {/* Action Button */}
-            <TouchableOpacity
-                style={[
-                    styles.actionButton,
-                    language.isStarted && styles.actionButtonPrimary,
-                ]}
-            >
-                <Text
-                    style={[
-                        styles.actionButtonText,
-                        language.isStarted && styles.actionButtonTextPrimary,
-                    ]}
-                >
-                    {language.isStarted ? 'Continue' : 'Start Learning'}
-                </Text>
-            </TouchableOpacity>
-        </TouchableOpacity>
-    );
-}
 
 const styles = StyleSheet.create({
     container: {

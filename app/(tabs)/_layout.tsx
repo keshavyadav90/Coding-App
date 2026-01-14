@@ -14,16 +14,16 @@ export default function TabLayout() {
   const colorScheme = useColorScheme();
   const {isSignedIn , isLoaded} = useAuth();
 
-  if(!isLoaded) {
-    return (
-      <View>
-        <ActivityIndicator  size= "large"/>
-      </View>
-    )
-  }
-  if(!isSignedIn) {
-    return <Redirect href= "/(auth)/Login"/>
-  }
+  // if(!isLoaded) {
+  //   return (
+  //     <View>
+  //       <ActivityIndicator  size= "large"/>
+  //     </View>
+  //   )
+  // }
+  // if(!isSignedIn) {
+  //   return <Redirect href= "/(auth)/Login"/>
+  // }
 
 
 

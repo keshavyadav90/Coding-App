@@ -5,18 +5,23 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
- 
   StatusBar,
   Image,
 } from 'react-native';
+
+
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFonts, SpaceGrotesk_300Light, SpaceGrotesk_400Regular, SpaceGrotesk_500Medium, SpaceGrotesk_600SemiBold, SpaceGrotesk_700Bold } from '@expo-google-fonts/space-grotesk';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from 'expo-router';
+import { useRouter } from 'expo-router';
+
+
 
 export default function App() {
   const Navigation = useNavigation()
+  const route = useRouter()
   let [fontsLoaded] = useFonts({
     SpaceGrotesk_300Light,
     SpaceGrotesk_400Regular,
@@ -39,9 +44,9 @@ export default function App() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Header Section */}
+
         <View style={styles.header}>
-          {/* Top Bar */}
+         
           <View style={styles.topBar}>
             <View style={styles.userInfo}>
               <View style={styles.avatarContainer}>
@@ -63,7 +68,7 @@ export default function App() {
             </TouchableOpacity>
           </View>
 
-          {/* Stats Bar */}
+          
           <ScrollView 
             horizontal 
             showsHorizontalScrollIndicator={false}
@@ -81,9 +86,9 @@ export default function App() {
           </ScrollView>
         </View>
 
-        {/* Main Content */}
+
         <View style={styles.mainContent}>
-          {/* Continue Learning Section */}
+          
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Continue Learning</Text>
@@ -124,7 +129,7 @@ export default function App() {
                 </View>
 
                 {/* Action Button */}
-                <TouchableOpacity style={styles.resumeButton} onPress={() => Navigation.navigate("codeEditor")}>
+                <TouchableOpacity style={styles.resumeButton} onPress={() => route.navigate('/codEditor')}>
                   <Ionicons name="play" size={20} color="#102217" />
                   <Text style={styles.resumeButtonText}>Resume Learning</Text>
                 </TouchableOpacity>
