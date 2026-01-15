@@ -11,6 +11,7 @@ const CLERK_PUBLIC_API_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 if(!CLERK_PUBLIC_API_KEY) {
   throw new Error ('Missing EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY in your .env file')
 }
+
 export default function RootLayout() {
 
   const colorScheme = useColorScheme();
