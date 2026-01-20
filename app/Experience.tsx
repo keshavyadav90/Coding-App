@@ -6,7 +6,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { responsiveHeight as hp, responsiveFontSize as rf, responsiveWidth as wp } from 'react-native-responsive-dimensions';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-// Experience level options data
+
 const experienceLevels = [
     {
         id: 1,
@@ -59,7 +59,7 @@ const Experience = () => {
 
     return (
         <SafeAreaView style={styles.container}>
-            {/* Header Section */}
+         
             <View style={styles.headerContainer}>
                 <View style={styles.titleContainer}>
                     <Text style={styles.titleText}>What's your experience</Text>
@@ -69,7 +69,6 @@ const Experience = () => {
                 <Text style={styles.subtitleText}>coding skills.</Text>
             </View>
 
-            {/* Experience Options */}
             <View style={styles.optionsContainer}>
                 {experienceLevels.map((level) => (
                     <TouchableOpacity
@@ -92,7 +91,6 @@ const Experience = () => {
                 ))}
             </View>
 
-            {/* Bottom Buttons */}
             <View style={styles.bottomButtonContainer}>
                 <View style={styles.buttonRow}>
                     <TouchableOpacity style={styles.backButton}>

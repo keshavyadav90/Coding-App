@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { responsiveHeight as hp, responsiveFontSize as rf, responsiveWidth as wp } from 'react-native-responsive-dimensions';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
+import { useRouter } from 'expo-router';
 
 const experienceLevels = ['Novice', 'Intermediate', 'Pro'];
 
@@ -26,6 +26,7 @@ export default function EditProfile() {
     const [github, setGithub] = useState('github.com/jane');
     const [primaryLanguage, setPrimaryLanguage] = useState('JavaScript');
     const [experienceLevel, setExperienceLevel] = useState('Intermediate');
+    const route = useRouter()
 
     let [fontsLoaded] = useFonts({
         SpaceGrotesk_400Regular,
@@ -33,6 +34,7 @@ export default function EditProfile() {
         SpaceGrotesk_600SemiBold,
         SpaceGrotesk_700Bold,
     });
+
 
     if (!fontsLoaded) {
         return null;
@@ -46,7 +48,7 @@ export default function EditProfile() {
 
             {/* Header */}
             <View style={styles.header}>
-                <TouchableOpacity style={styles.backButton}>
+                <TouchableOpacity style={styles.backButton} onPress={()=> route.back()}>
                     <Ionicons name="chevron-back" size={rf(3)} color="#fff" />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Edit Profile</Text>
@@ -58,7 +60,7 @@ export default function EditProfile() {
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContent}
             >
-                {/* Profile Photo Section */}
+               
                 <View style={styles.photoSection}>
                     <View style={styles.avatarContainer}>
                         <Image
@@ -72,9 +74,9 @@ export default function EditProfile() {
                     <Text style={styles.changePhotoText}>Change Photo</Text>
                 </View>
 
-                {/* Form Fields */}
+           
                 <View style={styles.formContainer}>
-                    {/* Username Field */}
+               
                     <View style={styles.fieldContainer}>
                         <Text style={styles.fieldLabel}>Username</Text>
                         <View style={styles.inputWithIcon}>
@@ -95,7 +97,7 @@ export default function EditProfile() {
                         </View>
                     </View>
 
-                    {/* Display Name Field */}
+                  
                     <View style={styles.fieldContainer}>
                         <Text style={styles.fieldLabel}>Display Name</Text>
                         <TextInput
@@ -107,7 +109,7 @@ export default function EditProfile() {
                         />
                     </View>
 
-                    {/* Bio Field */}
+          
                     <View style={styles.fieldContainer}>
                         <Text style={styles.fieldLabel}>Bio</Text>
                         <View style={styles.textAreaContainer}>
@@ -125,10 +127,10 @@ export default function EditProfile() {
                         </View>
                     </View>
 
-                    {/* Divider */}
+            
                     <View style={styles.divider} />
 
-                    {/* Location Field */}
+                  
                     <View style={styles.fieldContainer}>
                         <Text style={styles.fieldLabel}>Location</Text>
                         <View style={styles.inputWithLeftIcon}>
@@ -143,7 +145,7 @@ export default function EditProfile() {
                         </View>
                     </View>
 
-                    {/* Website Field */}
+                   
                     <View style={styles.fieldContainer}>
                         <Text style={styles.fieldLabel}>Website</Text>
                         <View style={styles.inputWithLeftIcon}>

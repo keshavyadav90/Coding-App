@@ -94,8 +94,8 @@ const Discription = () => {
             />
 
             <View style={styles.buttonContainer} >
-                <TouchableOpacity style={styles.button} onPress={()=> router.push({pathname:"/codEditor" , params:{parsedItem}})}>
-                    <Text style={{ color: "black" ,fontWeight:"900" ,fontSize:20 }}>Submit</Text>
+                <TouchableOpacity style={styles.button} onPress={() => router.push({ pathname: "/codEditor", params: { parsedItem: item } })}>
+                    <Text style={{ color: "black", fontWeight: "900", fontSize: 20 }}>Submit</Text>
                 </TouchableOpacity>
             </View>
 
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#102217'
     },
     button: {
-  
+
         borderRadius: 20,
         height: 50,
         width: "80%",
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
         bottom: 20,
         width: "100%",
         alignItems: "center",
-         backgroundColor: '#102217'
-       
+        backgroundColor: '#102217'
+
     }
 })

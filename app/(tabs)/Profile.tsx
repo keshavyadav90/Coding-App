@@ -13,8 +13,9 @@ import {
 } from 'react-native';
 import { responsiveHeight as hp, responsiveFontSize as rf, responsiveWidth as wp } from 'react-native-responsive-dimensions';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 
-// Stats data
+
 const stats = [
   { id: 1, icon: 'flash', value: '12,450', label: 'Total XP', color: '#2bee79' },
   { id: 2, icon: 'terminal', value: '45', label: 'Challenges', color: '#2bee79' },
@@ -22,11 +23,12 @@ const stats = [
   { id: 4, icon: 'trophy', value: '8/20', label: 'Badges', color: '#2bee79' },
 ];
 
-// Tabs
+
 const tabs = ['About', 'Achievements', 'Activity', 'Settings'];
 
-// Achievements data
+
 const achievements = [
+
   {
     id: 1,
     title: 'Loop Master',
@@ -36,6 +38,7 @@ const achievements = [
     gradientColors: ['#3b82f6', '#9333ea'],
     isEarned: true,
   },
+
   {
     id: 2,
     title: 'Hello World',
@@ -45,6 +48,7 @@ const achievements = [
     gradientColors: ['#2bee79', '#059669'],
     isEarned: true,
   },
+
   {
     id: 3,
     title: 'Bug Hunter',
@@ -55,8 +59,11 @@ const achievements = [
   },
 ];
 
+
 export default function Profile() {
-  const [activeTab, setActiveTab] = useState('Achievements');
+
+const [activeTab, setActiveTab] = useState('Achievements');
+const route = useRouter()
 
   let [fontsLoaded] = useFonts({
     SpaceGrotesk_400Regular,
@@ -76,6 +83,8 @@ export default function Profile() {
       <Text style={styles.statLabel}>{stat.label}</Text>
     </View>
   );
+
+
 
   const renderAchievement = (achievement: typeof achievements[0]) => (
     <View key={achievement.id} style={[styles.achievementCard, !achievement.isEarned && styles.lockedAchievement]}>
@@ -112,26 +121,29 @@ export default function Profile() {
     </View>
   );
 
+
   return (
+
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#102217" />
 
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Profile</Text>
-        <TouchableOpacity style={styles.editButton}>
+        <TouchableOpacity style={styles.editButton} onPress={()=> route.navigate("/EditProfile") }>
           <MaterialIcons name="edit" size={rf(2.8)} color="#fff" />
         </TouchableOpacity>
       </View>
+
 
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Profile Header */}
+
         <View style={styles.profileHeader}>
-          {/* Profile Image */}
+
+
           <View style={styles.avatarContainer}>
             <View style={styles.avatarGlow} />
             <Image
@@ -143,11 +155,11 @@ export default function Profile() {
             </TouchableOpacity>
           </View>
 
-          {/* Name & Username */}
+
           <Text style={styles.userName}>Alex Coder</Text>
           <Text style={styles.userHandle}>@alexcodes</Text>
 
-          {/* Tags */}
+
           <View style={styles.tagsContainer}>
             <View style={styles.levelTag}>
               <Text style={styles.levelTagText}>LEVEL 12: PYTHONISTA</Text>
@@ -158,12 +170,12 @@ export default function Profile() {
           </View>
         </View>
 
-        {/* Stats Grid */}
+
         <View style={styles.statsGrid}>
           {stats.map(renderStatCard)}
         </View>
 
-        {/* Tabs */}
+
         <View style={styles.tabsContainer}>
           {tabs.map((tab) => (
             <TouchableOpacity
@@ -178,7 +190,7 @@ export default function Profile() {
           ))}
         </View>
 
-        {/* Achievements Section */}
+
         <View style={styles.achievementsSection}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Recent Badges</Text>
@@ -190,7 +202,7 @@ export default function Profile() {
           {achievements.map(renderAchievement)}
         </View>
 
-        {/* Level Progress */}
+
         <View style={styles.levelProgressSection}>
           <View style={styles.levelProgressHeader}>
             <Text style={styles.levelProgressTitle}>Level Progress</Text>
@@ -200,6 +212,7 @@ export default function Profile() {
             <View style={[styles.levelProgressFill, { width: '85%' }]} />
           </View>
         </View>
+
       </ScrollView>
     </SafeAreaView>
   );
@@ -211,7 +224,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#102217',
   },
 
-  // Header
+  
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -235,7 +248,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  // ScrollView
+  
   scrollView: {
     flex: 1,
   },
@@ -243,7 +256,7 @@ const styles = StyleSheet.create({
     paddingBottom: hp(5),
   },
 
-  // Profile Header
+ 
   profileHeader: {
     alignItems: 'center',
     paddingTop: hp(3),
