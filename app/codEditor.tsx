@@ -732,6 +732,7 @@ const CodeEditor = () => {
   const handleCodeChange = (newCode: string) => {
     setCode(newCode);
   };
+
   const getSyntaxLanguage = (lang: string) => {
     const mapping: { [key: string]: string } = {
       'JavaScript': 'javascript',
@@ -740,17 +741,18 @@ const CodeEditor = () => {
       'C++': 'cpp',
       'TypeScript': 'typescript'
     };
+
     return mapping[lang] || 'javascript';
   };
 
   const runCode = async () => {
     try {
-      await axios.post("http://127.0.0.1:3000/run", {
+      await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/submit`, {
         code,
         language: selectedLanguage,
         timeoutMs: 3000,
         user_id: 1,
-        problem_id: 2
+        problem_id: Item.id 
       })
     } catch (error) {
       console.error("Failed to fetch error", error)
@@ -799,12 +801,12 @@ const CodeEditor = () => {
           visible={visible}
           onRequestClose={() => setVisible(false)}
         >
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.modalOverlay}
             activeOpacity={1}
             onPress={() => setVisible(false)}
           >
-            <TouchableOpacity 
+            <TouchableOpacity
               activeOpacity={1}
               onPress={(e) => e.stopPropagation()}
             >
@@ -844,7 +846,7 @@ const CodeEditor = () => {
                     </TouchableOpacity>
                   ))}
                 </ScrollView>
-            
+
               </View>
             </TouchableOpacity>
           </TouchableOpacity>
